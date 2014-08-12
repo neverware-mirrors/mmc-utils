@@ -30,3 +30,7 @@ int do_status_get(int nargs, char **argv);
 int do_enh_area_set(int nargs, char **argv);
 int do_write_reliability_set(int nargs, char **argv);
 int do_emmc50_ffu(int nargs, char **argv);
+int do_rpmb_write_key(int nargs, char **argv);
+int do_rpmb_read_counter(int nargs, char **argv);
+int do_rpmb_read_block(int nargs, char **argv);
+int do_rpmb_write_block(int nargs, char **argv);
