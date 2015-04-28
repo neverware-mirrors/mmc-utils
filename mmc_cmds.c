@@ -719,6 +719,7 @@ int do_read_extcsd(int nargs, char **argv)
 		"4.41",	/* 5 */
 		"4.5",  /* 6 */
 		"5.0",  /* 7 */
+		"5.1",  /* 8 */
 	};
 	int boot_access;
 	const char* boot_access_str[] = {
