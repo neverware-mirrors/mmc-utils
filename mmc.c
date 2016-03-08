@@ -13,6 +13,9 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 021110-1307, USA.
  *
+ * Modified to add field firmware update support,
+ * those modifications are Copyright (c) 2016 SanDisk Corp.
+ *
  * (This code is based on btrfs-progs/btrfs.c.)
  */
 
@@ -128,12 +131,6 @@ static struct Command commands[] = {
 		"Send Sanitize command to the <device>.\nThis will delete the unmapped memory region of the device.",
 	  NULL
 	},
-	{ do_emmc50_ffu, -2,
-	  "ffu", "[-k hack_type[:hack_value]] <image name> <device>\n"
-		"run eMMC 5.0 Field firmware update.\n"
-		"Device specific hacks can be specificied.",
-	  NULL
-	},
 	{ do_rpmb_write_key, -1,
 	  "rpmb write-key", "<rpmb device> <key file>\n"
 		  "Program authentication key which is 32 bytes length and stored\n"
@@ -227,6 +224,17 @@ static struct Command commands[] = {
 	},
 	{ do_blockprotect_info, -1, "blockprotect info", "<device>\n"
 		"Query information about device's block protect capabilities.",
+	  NULL
+	},
+	{ do_emmc50_ffu, -2,
+	  "old_ffu", "[-k hack_type[:hack_value]] <image name> <device>\n"
+		"run eMMC 5.0 Field firmware update.\n"
+		"Device specific hacks can be specificied.",
+	  NULL
+	},
+	{ do_ffu, -2,
+	  "ffu", "<image name> <device>\n"
+		"Run Field Firmware Update with <image name> on <device>.\n",
 	  NULL
 	},
 	{ 0, 0, 0, 0 }
