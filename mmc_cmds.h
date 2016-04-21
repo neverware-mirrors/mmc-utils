@@ -41,3 +41,7 @@ int do_cache_dis(int nargs, char **argv);
 int do_read_scr(int argc, char **argv);
 int do_read_cid(int argc, char **argv);
 int do_read_csd(int argc, char **argv);
+int do_blockprotect_enable(int nargs, char **argv);
+int do_blockprotect_disable(int nargs, char **argv);
+int do_blockprotect_read(int nargs, char **argv);
+int do_blockprotect_info(int nargs, char **argv);

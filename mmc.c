@@ -204,6 +204,31 @@ static struct Command commands[] = {
 		  "The device path should specify the scr file directory.",
 	  NULL
 	},
+	{ do_blockprotect_enable, -2, "blockprotect enable",
+		"[-p|-r] <device> <sector>\n"
+		"Enable block protection for a given sector. Will write protect all\n"
+		"sectors within the target sector's write protect block. Write protect\n"
+		"block size is a multiple of erase block size and device dependent.\n"
+		"Run mmc blockprotect info to query write protect block size.\n"
+		"  -p  Protect block permanently. WARNING: THIS IS IRREVERSIBLE!\n"
+		"  -r  Protect block until next power-on.",
+	  NULL
+	},
+	{ do_blockprotect_disable, -2, "blockprotect disable",
+		"<device> <sector>\n"
+		"Disable block protection for a given sector. Will disable protection\n"
+		"for all sectors within the target sector's write protect block.\n"
+		"Cannot disable permanent or power-on write protection.",
+	  NULL
+	},
+	{ do_blockprotect_read, -2, "blockprotect read", "<device> <sector>\n"
+		"Query the current block protection status of a given sector.",
+	  NULL
+	},
+	{ do_blockprotect_info, -1, "blockprotect info", "<device>\n"
+		"Query information about device's block protect capabilities.",
+	  NULL
+	},
 	{ 0, 0, 0, 0 }
 };
 

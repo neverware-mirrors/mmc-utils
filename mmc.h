@@ -31,6 +31,9 @@
 #define MMC_SWITCH		6	/* ac	[31:0] See below	R1b */
 #define MMC_SEND_EXT_CSD	8	/* adtc				R1  */
 #define MMC_SEND_STATUS		13	/* ac   [31:16] RCA        R1  */
+#define MMC_SET_WRITE_PROT	28	/* ac	[31:0] block number	R1b */
+#define MMC_CLR_WRITE_PROT	29	/* ac	[31:0] block number	R1b */
+#define MMC_SEND_WRITE_PROT_TYPE 31	/* adtc	[31:0] block number	R1 */
 #define R1_SWITCH_ERROR   (1 << 7)  /* sx, c */
 #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
 #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data addr   R1  */
@@ -58,6 +61,7 @@
 #define EXT_CSD_BOOT_BUS_CONDITIONS	177
 #define EXT_CSD_ERASE_GROUP_DEF		175
 #define EXT_CSD_BOOT_WP			173
+#define EXT_CSD_USER_WP			171
 #define EXT_CSD_WR_REL_SET		167
 #define EXT_CSD_WR_REL_PARAM		166
 #define EXT_CSD_SANITIZE_START		165
@@ -92,6 +96,7 @@
 #define EXT_CSD_NATIVE_SECTOR_SIZE	63 /* R */
 #define EXT_CSD_USE_NATIVE_SECTOR	62 /* R/W */
 #define EXT_CSD_DATA_SECTOR_SIZE	61 /* R */
+#define EXT_CSD_CLASS_6_CTRL		59
 #define EXT_CSD_EXT_PARTITIONS_ATTRIBUTE_1	53
 #define EXT_CSD_EXT_PARTITIONS_ATTRIBUTE_0	52
 #define EXT_CSD_CACHE_CTRL		33
@@ -140,6 +145,10 @@
 #define EXT_CSD_ENH_2			(1<<2)
 #define EXT_CSD_ENH_1			(1<<1)
 #define EXT_CSD_ENH_USR			(1<<0)
+#define EXT_CSD_US_PERM_WP_DIS		(1<<4)
+#define EXT_CSD_US_PWR_WP_DIS		(1<<3)
+#define EXT_CSD_US_PERM_WP_EN		(1<<2)
+#define EXT_CSD_US_PWR_WP_EN		(1<<0)
 #define EXT_CSD_REV_V5_1		8
 #define EXT_CSD_REV_V5_0		7
 #define EXT_CSD_REV_V4_5		6

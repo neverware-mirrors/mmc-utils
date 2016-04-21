@@ -40,6 +40,9 @@
 #define FFU_DATA_SIZE	512
 #define CID_SIZE 16
 
+/* Sending several commands too close together seems to cause timeouts. */
+#define INTER_COMMAND_GAP_US (50 * 1000)
+
 #include "3rdparty/hmac_sha/hmac_sha2.h"
 
 int read_extcsd(int fd, __u8 *ext_csd)
@@ -1619,6 +1622,223 @@ int do_sanitize(int nargs, char **argv)
 
 	return ret;
 
+}
+
+enum blockprotect_mode {
+	BLOCKPROTECT_TEMPORARY = 0,
+	BLOCKPROTECT_POWERON,
+	BLOCKPROTECT_PERMANENT,
+};
+
+int write_blockprotect(int fd, __u32 sector, int enable)
+{
+	struct mmc_ioc_cmd cmd;
+	int ret;
+
+	memset(&cmd, 0, sizeof(cmd));
+	cmd.write_flag = 1;
+	cmd.opcode = enable ? MMC_SET_WRITE_PROT : MMC_CLR_WRITE_PROT;
+	cmd.arg = sector;
+	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+
+	ret = ioctl(fd, MMC_IOC_CMD, &cmd);
+	if (ret)
+		perror("SET/CLR_WRITE_PROT command");
+	return ret;
+}
+
+int do_blockprotect_enable(int nargs, char **argv)
+{
+	__u8 ext_csd[EXT_CSD_SIZE];
+	__u8 user_wp;
+	__u32 sector;
+	char *end;
+	int ret, fd;
+	int arg_index = 0;
+	enum blockprotect_mode mode = BLOCKPROTECT_TEMPORARY;
+
+	if (nargs > 0 && !strcmp(argv[1], "-r")) {
+		arg_index++;
+		mode = BLOCKPROTECT_POWERON;
+	} else if (nargs > 0 && !strcmp(argv[1], "-p")) {
+		arg_index++;
+		mode = BLOCKPROTECT_PERMANENT;
+	}
+
+	CHECK(nargs != 3 + arg_index, "Usage: mmc blockprotect enable [-p|-r] <device> <write protect block>\n", exit(1));
+
+	sector = strtoul(argv[2 + arg_index], &end, 0);
+	if (*end != '\0') {
+		fprintf(stderr, "Not a block number: %s\n",
+			argv[2 + arg_index]);
+		exit(1);
+	}
+
+	fd = open(argv[1 + arg_index], O_RDWR);
+	if (fd < 0) {
+		perror("open");
+		exit(1);
+	}
+
+	if (read_extcsd(fd, ext_csd))
+		exit(1);
+
+	user_wp = ext_csd[EXT_CSD_USER_WP];
+	user_wp &= ~(EXT_CSD_US_PERM_WP_EN | EXT_CSD_US_PWR_WP_EN);
+	if (mode == BLOCKPROTECT_POWERON)
+		user_wp |= EXT_CSD_US_PWR_WP_EN;
+	else if (mode == BLOCKPROTECT_PERMANENT)
+		user_wp |= EXT_CSD_US_PERM_WP_EN;
+
+	ret = write_extcsd_value(fd, EXT_CSD_USER_WP, user_wp);
+	if (ret) {
+		perror("update EXT_CSD[USER_WP]");
+		exit(1);
+	}
+
+	usleep(INTER_COMMAND_GAP_US);
+
+	ret = write_blockprotect(fd, sector, 1);
+
+	usleep(INTER_COMMAND_GAP_US);
+
+	user_wp &= ~(EXT_CSD_US_PERM_WP_EN | EXT_CSD_US_PWR_WP_EN);
+	if (write_extcsd_value(fd, EXT_CSD_USER_WP, user_wp)) {
+		perror("reset EXT_CSD[USER_WP]");
+		if (!ret)
+			ret = -1;
+	}
+
+	return ret;
+}
+
+int do_blockprotect_disable(int nargs, char **argv)
+{
+	__u32 sector;
+	char *end;
+	int fd;
+
+	CHECK(nargs != 3, "Usage: mmc blockprotect disable <device> <write protect block>\n", exit(1));
+
+	sector = strtoul(argv[2], &end, 0);
+	if (*end != '\0') {
+		fprintf(stderr, "Not a block number: %s\n", argv[2]);
+		exit(1);
+	}
+
+
+	fd = open(argv[1], O_RDWR);
+	if (fd < 0) {
+		perror("open");
+		exit(1);
+	}
+
+	return write_blockprotect(fd, sector, 0);
+}
+
+int do_blockprotect_read(int nargs, char **argv)
+{
+	__u8 wp_bits[8];
+	__u32 sector;
+	char *end;
+	int fd;
+	struct mmc_ioc_cmd cmd;
+
+	CHECK(nargs != 3, "Usage: mmc blockprotect read <device> <write protect block>\n", exit(1));
+
+	fd = open(argv[1], O_RDWR);
+	if (fd < 0) {
+		perror("open");
+		exit(1);
+	}
+
+	sector = strtoul(argv[2], &end, 0);
+	if (*end != '\0') {
+		fprintf(stderr, "Not a block number: %s\n", argv[2]);
+		exit(1);
+	}
+
+	memset(&cmd, 0, sizeof(cmd));
+	cmd.write_flag = 0;
+	cmd.opcode = MMC_SEND_WRITE_PROT_TYPE;
+	cmd.arg = sector;
+	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+	cmd.blksz = sizeof(wp_bits);
+	cmd.blocks = 1;
+	mmc_ioc_cmd_set_data(cmd, wp_bits);
+
+	if (ioctl(fd, MMC_IOC_CMD, &cmd)) {
+		perror("SEND_WRITE_PROT_TYPE command");
+		exit(1);
+	}
+
+	printf("Sector %u write protection: ", sector);
+	switch (wp_bits[7] & 3) {
+	case 0:
+		printf("NONE\n");
+		break;
+	case 1:
+		printf("TEMPORARY\n");
+		break;
+	case 2:
+		printf("POWER-ON\n");
+		break;
+	case 3:
+		printf("PERMANENT\n");
+		break;
+	}
+
+	return 0;
+}
+
+int do_blockprotect_info(int nargs, char **argv)
+{
+	__u8 ext_csd[EXT_CSD_SIZE];
+	__u8 user_wp;
+	int fd, wp_sz, erase_sz;
+
+	CHECK(nargs != 2, "Usage: mmc blockprotect info <device>\n", exit(1));
+
+	fd = open(argv[1], O_RDWR);
+	if (fd < 0) {
+		perror("open");
+		exit(1);
+	}
+
+	if (read_extcsd(fd, ext_csd))
+		exit(1);
+
+	if (ext_csd[EXT_CSD_CLASS_6_CTRL] != 0) {
+		fprintf(stderr, "Block protection commands not supported: "
+			"CLASS_6_CTRL set.\n");
+		exit(1);
+	}
+
+	if ((ext_csd[EXT_CSD_ERASE_GROUP_DEF] & 0x1) != 0x1) {
+		fprintf(stderr, "Block protection commands not supported: "
+			"high-capacity sizes not enabled.\n");
+		exit(1);
+	}
+
+	wp_sz = get_hc_wp_grp_size(ext_csd);
+	erase_sz = get_hc_erase_grp_size(ext_csd);
+
+	if (erase_sz == 0 || wp_sz == 0) {
+		fprintf(stderr, "Block protection commands not supported: "
+			"no high-capacity size for erase or WP blocks.\n");
+		exit(1);
+	}
+
+	printf("Write protect block size in sectors: %d\n",
+	       erase_sz * wp_sz * 1024);
+
+	user_wp = ext_csd[EXT_CSD_USER_WP];
+	printf("Permanent write protection: %s\n",
+	       user_wp & EXT_CSD_US_PERM_WP_DIS ? "forbidden" : "allowed");
+	printf("Power-on write protection: %s\n",
+	       user_wp & EXT_CSD_US_PWR_WP_DIS ? "forbidden" : "allowed");
+
+	return 0;
 }
 
 static const char* const mmc_ffu_hack_names[] = {
