@@ -1089,7 +1089,7 @@ int do_create_gp_partition(int nargs, char **argv)
 	if (ret)
 		exit(1);
 
-	if (!set_partitioning_setting_completed(dry_run, device, fd))
+	if (set_partitioning_setting_completed(dry_run, device, fd))
 		exit(1);
 
 	return 0;
@@ -1234,7 +1234,7 @@ int do_enh_area_set(int nargs, char **argv)
 
 	printf("Done setting ENH_USR area on %s\n", device);
 
-	if (!set_partitioning_setting_completed(dry_run, device, fd))
+	if (set_partitioning_setting_completed(dry_run, device, fd))
 		exit(1);
 
 	return 0;
@@ -1296,7 +1296,7 @@ int do_write_reliability_set(int nargs, char **argv)
 	printf("Done setting EXT_CSD_WR_REL_SET to 0x%02x on %s\n",
 		value, device);
 
-	if (!set_partitioning_setting_completed(dry_run, device, fd))
+	if (set_partitioning_setting_completed(dry_run, device, fd))
 		exit(1);
 
 	return 0;
