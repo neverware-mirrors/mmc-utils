@@ -242,9 +242,10 @@ int do_writeprotect_boot_get(int nargs, char **argv)
 	int fd, ret;
 	char *device;
 
-	CHECK(nargs != 2,
-		"Usage: mmc writeprotect boot get </path/to/mmcblkX>\n",
-		exit(1));
+	if (nargs != 2) {
+		fprintf(stderr, "Usage: mmc writeprotect boot get </path/to/mmcblkX>\n");
+		exit(1);
+	}
 
 	device = argv[1];
 
@@ -271,9 +272,10 @@ int do_writeprotect_boot_set(int nargs, char **argv)
 	int fd, ret;
 	char *device;
 
-	CHECK(nargs != 2,
-		"Usage: mmc writeprotect boot set </path/to/mmcblkX>\n",
-		exit(1));
+	if (nargs != 2) {
+		fprintf(stderr, "Usage: mmc writeprotect boot set </path/to/mmcblkX>\n");
+		exit(1);
+	}
 
 	device = argv[1];
 
@@ -336,9 +338,10 @@ int do_writeprotect_user_get(int nargs, char **argv)
 	__u32 last_prot = -1;
 	int remain;
 
-	CHECK(nargs != 2,
-		"Usage: mmc writeprotect user get </path/to/mmcblkX>\n",
-		exit(1));
+	if (nargs != 2) {
+		fprintf(stderr, "Usage: mmc writeprotect user get </path/to/mmcblkX>\n");
+		exit(1);
+	}
 
 	device = argv[1];
 
@@ -493,7 +496,11 @@ int do_disable_512B_emulation(int nargs, char **argv)
 	int fd, ret;
 	char *device;
 
-	CHECK(nargs != 2, "Usage: mmc disable 512B emulation </path/to/mmcblkX>\n", exit(1));
+	if (nargs != 2) {
+		fprintf(stderr, "Usage: mmc disable 512B emulation </path/to/mmcblkX>\n");
+		exit(1);
+	}
+
 	device = argv[1];
 
 	fd = open(device, O_RDWR);
@@ -539,8 +546,10 @@ int do_write_boot_en(int nargs, char **argv)
 	char *device;
 	int boot_area, send_ack;
 
-	CHECK(nargs != 4, "Usage: mmc bootpart enable <partition_number> "
-			  "<send_ack> </path/to/mmcblkX>\n", exit(1));
+	if (nargs != 4) {
+		fprintf(stderr, "Usage: mmc bootpart enable <partition_number> <send_ack> </path/to/mmcblkX>\n");
+		exit(1);
+	}
 
 	/*
 	 * If <send_ack> is 1, the device will send acknowledgment
@@ -607,9 +616,10 @@ int do_boot_bus_conditions_set(int nargs, char **argv)
 	int fd, ret;
 	char *device;
 
-	CHECK(nargs != 5, "Usage: mmc: bootbus set <boot_mode> "
-	      "<reset_boot_bus_conditions> <boot_bus_width> <device>\n",
-		exit(1));
+	if (nargs != 5) {
+		fprintf(stderr, "Usage: mmc: bootbus set <boot_mode> <reset_boot_bus_conditions> <boot_bus_width> <device>\n");
+		exit(1);
+	}
 
 	if (strcmp(argv[1], "single_backward") == 0)
 		value |= 0;
@@ -675,8 +685,10 @@ int do_hwreset(int value, int nargs, char **argv)
 	int fd, ret;
 	char *device;
 
-	CHECK(nargs != 2, "Usage: mmc hwreset enable </path/to/mmcblkX>\n",
-			  exit(1));
+	if (nargs != 2) {
+		fprintf(stderr, "Usage: mmc hwreset enable </path/to/mmcblkX>\n");
+		exit(1);
+	}
 
 	device = argv[1];
 
@@ -734,8 +746,10 @@ int do_write_bkops_en(int nargs, char **argv)
 	int fd, ret;
 	char *device;
 
-	CHECK(nargs != 2, "Usage: mmc bkops enable </path/to/mmcblkX>\n",
-			exit(1));
+	if (nargs != 2) {
+	       fprintf(stderr, "Usage: mmc bkops enable </path/to/mmcblkX>\n");
+	       exit(1);
+	}
 
 	device = argv[1];
 
@@ -772,8 +786,10 @@ int do_status_get(int nargs, char **argv)
 	int fd, ret;
 	char *device;
 
-	CHECK(nargs != 2, "Usage: mmc status get </path/to/mmcblkX>\n",
-		exit(1));
+	if (nargs != 2) {
+		fprintf(stderr, "Usage: mmc status get </path/to/mmcblkX>\n");
+		exit(1);
+	}
 
 	device = argv[1];
 
@@ -979,8 +995,10 @@ int do_create_gp_partition(int nargs, char **argv)
 	unsigned int length_kib, gp_size_mult;
 	unsigned long align;
 
-	CHECK(nargs != 7, "Usage: mmc gp create <-y|-n|-c> <length KiB> "
-		"<partition> <enh_attr> <ext_attr> </path/to/mmcblkX>\n", exit(1));
+	if (nargs != 7) {
+		fprintf(stderr, "Usage: mmc gp create <-y|-n|-c> <length KiB> <partition> <enh_attr> <ext_attr> </path/to/mmcblkX>\n");
+		exit(1);
+	}
 
 	if (!strcmp("-y", argv[1])) {
 		dry_run = 0;
@@ -1105,8 +1123,10 @@ int do_enh_area_set(int nargs, char **argv)
 	unsigned int start_kib, length_kib, enh_start_addr, enh_size_mult;
 	unsigned long align;
 
-	CHECK(nargs != 5, "Usage: mmc enh_area set <-y|-n|-c> <start KiB> <length KiB> "
-			  "</path/to/mmcblkX>\n", exit(1));
+	if (nargs != 5) {
+		fprintf(stderr, "Usage: mmc enh_area set <-y|-n|-c> <start KiB> <length KiB> </path/to/mmcblkX>\n");
+		exit(1);
+	}
 
 	if (!strcmp("-y", argv[1])) {
 		dry_run = 0;
@@ -1250,8 +1270,10 @@ int do_write_reliability_set(int nargs, char **argv)
 	int partition;
 	char *device;
 
-	CHECK(nargs != 4, "Usage: mmc write_reliability set <-y|-n|-c> "
-			"<partition> </path/to/mmcblkX>\n", exit(1));
+	if (nargs != 4) {
+		fprintf(stderr,"Usage: mmc write_reliability set <-y|-n|-c> <partition> </path/to/mmcblkX>\n");
+		exit(1);
+	}
 
 	if (!strcmp("-y", argv[1])) {
 		dry_run = 0;
@@ -1331,8 +1353,10 @@ int do_read_extcsd(int nargs, char **argv)
 		"R/W Replay Protected Memory Block (RPMB)", /* 3 */
 	};
 
-	CHECK(nargs != 2, "Usage: mmc extcsd read </path/to/mmcblkX>\n",
-			  exit(1));
+	if (nargs != 2) {
+		fprintf(stderr, "Usage: mmc extcsd read </path/to/mmcblkX>\n");
+		exit(1);
+	}
 
 	device = argv[1];
 
@@ -1885,9 +1909,10 @@ int do_dump_extcsd(int nargs, char **argv)
 	char *device;
 	int i, j;
 
-	CHECK(nargs != 2, "Usage: mmc extcsd dump </path/to/mmcblkX>\n",
-			  exit(1));
-
+	if (nargs != 2) {
+		fprintf(stderr, "Usage: mmc writeprotect boot get </path/to/mmcblkX>\n");
+		exit(1);
+	}
 	device = argv[1];
 
 	fd = open(device, O_RDWR);
@@ -1921,8 +1946,10 @@ int do_sanitize(int nargs, char **argv)
 	int fd, ret;
 	char *device;
 
-	CHECK(nargs != 2, "Usage: mmc sanitize </path/to/mmcblkX>\n",
-			exit(1));
+	if (nargs != 2) {
+		fprintf(stderr, "Usage: mmc sanitize </path/to/mmcblkX>\n");
+		exit(1);
+	}
 
 	device = argv[1];
 
@@ -1984,8 +2011,10 @@ int do_blockprotect_enable(int nargs, char **argv)
 		mode = BLOCKPROTECT_PERMANENT;
 	}
 
-	CHECK(nargs != 3 + arg_index, "Usage: mmc blockprotect enable [-p|-r] <device> <write protect block>\n", exit(1));
-
+	if (nargs != 3 + arg_index) {
+		fprintf(stderr, "Usage: mmc blockprotect enable [-p|-r] <device> <write protect block>\n");
+		exit(1);
+	}
 	sector = strtoul(argv[2 + arg_index], &end, 0);
 	if (*end != '\0') {
 		fprintf(stderr, "Not a block number: %s\n",
@@ -2037,8 +2066,10 @@ int do_blockprotect_disable(int nargs, char **argv)
 	char *end;
 	int fd;
 
-	CHECK(nargs != 3, "Usage: mmc blockprotect disable <device> <write protect block>\n", exit(1));
-
+	if (nargs != 3) {
+		fprintf(stderr, "Usage: mmc blockprotect disable <device> <write protect block>\n");
+		exit(1);
+	}
 	sector = strtoul(argv[2], &end, 0);
 	if (*end != '\0') {
 		fprintf(stderr, "Not a block number: %s\n", argv[2]);
@@ -2063,8 +2094,10 @@ int do_blockprotect_read(int nargs, char **argv)
 	int fd;
 	struct mmc_ioc_cmd cmd;
 
-	CHECK(nargs != 3, "Usage: mmc blockprotect read <device> <write protect block>\n", exit(1));
-
+	if (nargs != 3) {
+		fprintf(stderr, "Usage: mmc blockprotect read <device> <write protect block>\n");
+		exit(1);
+	}
 	fd = open(argv[1], O_RDWR);
 	if (fd < 0) {
 		perror("open");
@@ -2116,8 +2149,10 @@ int do_blockprotect_info(int nargs, char **argv)
 	__u8 user_wp;
 	int fd, wp_sz, erase_sz;
 
-	CHECK(nargs != 2, "Usage: mmc blockprotect info <device>\n", exit(1));
-
+	if (nargs != 2) {
+		fprintf(stderr, "Usage: mmc blockprotect info <device>\n");
+		exit(1);
+	}
 	fd = open(argv[1], O_RDWR);
 	if (fd < 0) {
 		perror("open");
@@ -2395,8 +2430,10 @@ int do_rpmb_write_key(int nargs, char **argv)
 		.req_resp = htobe16(MMC_RPMB_WRITE_KEY)
 	}, frame_out;
 
-	CHECK(nargs != 3, "Usage: mmc rpmb write-key </path/to/mmcblkXrpmb> </path/to/key>\n",
-			exit(1));
+	if (nargs != 3) {
+		fprintf(stderr, "Usage: mmc rpmb write-key </path/to/mmcblkXrpmb> </path/to/key>\n");
+		exit(1);
+	}
 
 	dev_fd = open(argv[1], O_RDWR);
 	if (dev_fd < 0) {
@@ -2475,8 +2512,10 @@ int do_rpmb_read_counter(int nargs, char **argv)
 	int ret, dev_fd;
 	unsigned int cnt;
 
-	CHECK(nargs != 2, "Usage: mmc rpmb read-counter </path/to/mmcblkXrpmb>\n",
-			exit(1));
+	if (nargs != 2) {
+		fprintf(stderr, "Usage: mmc rpmb read-counter </path/to/mmcblkXrpmb>\n");
+		exit(1);
+	}
 
 	dev_fd = open(argv[1], O_RDWR);
 	if (dev_fd < 0) {
@@ -2508,8 +2547,10 @@ int do_rpmb_read_block(int nargs, char **argv)
 		.req_resp    = htobe16(MMC_RPMB_READ),
 	}, *frame_out_p;
 
-	CHECK(nargs != 5 && nargs != 6, "Usage: mmc rpmb read-block </path/to/mmcblkXrpmb> <address> <blocks count> </path/to/output_file> [/path/to/key]\n",
-			exit(1));
+	if (nargs != 5 && nargs != 6) {
+		fprintf(stderr, "Usage: mmc rpmb read-block </path/to/mmcblkXrpmb> <address> <blocks count> </path/to/output_file> [/path/to/key]\n");
+		exit(1);
+	}
 
 	dev_fd = open(argv[1], O_RDWR);
 	if (dev_fd < 0) {
@@ -2657,8 +2698,10 @@ int do_rpmb_write_block(int nargs, char **argv)
 		.block_count = htobe16(1)
 	}, frame_out;
 
-	CHECK(nargs != 5, "Usage: mmc rpmb write-block </path/to/mmcblkXrpmb> <address> </path/to/input_file> </path/to/key>\n",
-			exit(1));
+	if (nargs != 5) {
+		fprintf(stderr, "Usage: mmc rpmb write-block </path/to/mmcblkXrpmb> <address> </path/to/input_file> </path/to/key>\n");
+		exit(1);
+	}
 
 	dev_fd = open(argv[1], O_RDWR);
 	if (dev_fd < 0) {
@@ -2762,8 +2805,10 @@ int do_cache_ctrl(int value, int nargs, char **argv)
 	int fd, ret;
 	char *device;
 
-	CHECK(nargs != 2, "Usage: mmc cache enable </path/to/mmcblkX>\n",
-			  exit(1));
+	if (nargs != 2) {
+	       fprintf(stderr, "Usage: mmc cache enable </path/to/mmcblkX>\n");
+	       exit(1);
+	}
 
 	device = argv[1];
 
@@ -2835,8 +2880,10 @@ int do_ffu(int nargs, char **argv)
 	char *device;
 	struct mmc_ioc_multi_cmd *multi_cmd;
 
-	CHECK(nargs != 3, "Usage: ffu <image name> </path/to/mmcblkX> \n",
-			exit(1));
+	if (nargs != 3) {
+		fprintf(stderr, "Usage: ffu <image name> </path/to/mmcblkX> \n");
+		exit(1);
+	}
 
 	device = argv[2];
 	dev_fd = open(device, O_RDWR);
